@@ -1,0 +1,5 @@
+/kartochka-tovara
+/kartochka-tovara.exe
+*.exe
+*.test
+/kartochka-data/
