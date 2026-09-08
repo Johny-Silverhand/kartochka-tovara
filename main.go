@@ -20,7 +20,7 @@ import (
 //go:embed web/*
 var webFS embed.FS
 
-const version = "0.1.0"
+const version = "0.1.1"
 const listenAddr = "127.0.0.1:8765"
 
 func dataRoot() string {
@@ -98,35 +98,55 @@ func main() {
 		}
 		id := parts[0]
 
-		if len(parts) == 2 && parts[1] == "photo" && r.Method == http.MethodPost {
-			if err := r.ParseMultipartForm(12 << 20); err != nil {
-				http.Error(w, "multipart", 400)
+		if len(parts) >= 2 && parts[1] == "photo" {
+			if r.Method == http.MethodPost && len(parts) == 2 {
+				if err := r.ParseMultipartForm(12 << 20); err != nil {
+					http.Error(w, "multipart", 400)
+					return
+				}
+				f, hdr, err := r.FormFile("photo")
+				if err != nil {
+					http.Error(w, "photo required", 400)
+					return
+				}
+				defer f.Close()
+				data, err := io.ReadAll(io.LimitReader(f, 10<<20))
+				if err != nil {
+					http.Error(w, "read", 500)
+					return
+				}
+				ext := strings.ToLower(filepath.Ext(hdr.Filename))
+				switch ext {
+				case ".jpg", ".jpeg", ".png", ".webp", ".gif":
+				default:
+					ext = ".jpg"
+				}
+				c, err := store.AddPhoto(id, ext, data)
+				if err != nil {
+					code := 400
+					if err.Error() == "not found" {
+						code = 404
+					}
+					http.Error(w, err.Error(), code)
+					return
+				}
+				writeJSON(w, c)
 				return
 			}
-			f, hdr, err := r.FormFile("photo")
-			if err != nil {
-				http.Error(w, "photo required", 400)
+			if r.Method == http.MethodDelete && len(parts) == 3 {
+				var idx int
+				if _, err := fmt.Sscanf(parts[2], "%d", &idx); err != nil {
+					http.Error(w, "bad index", 400)
+					return
+				}
+				c, err := store.RemovePhoto(id, idx)
+				if err != nil {
+					http.Error(w, err.Error(), 404)
+					return
+				}
+				writeJSON(w, c)
 				return
 			}
-			defer f.Close()
-			data, err := io.ReadAll(io.LimitReader(f, 10<<20))
-			if err != nil {
-				http.Error(w, "read", 500)
-				return
-			}
-			ext := strings.ToLower(filepath.Ext(hdr.Filename))
-			switch ext {
-			case ".jpg", ".jpeg", ".png", ".webp", ".gif":
-			default:
-				ext = ".jpg"
-			}
-			c, err := store.SetPhoto(id, ext, data)
-			if err != nil {
-				http.Error(w, err.Error(), 404)
-				return
-			}
-			writeJSON(w, c)
-			return
 		}
 
 		if len(parts) != 1 {
