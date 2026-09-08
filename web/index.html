@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Карточка товара · Victimok Labs</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-node">// KARTOCHKA_TOVARA // v0.1</div>
+        <h1>Карточки</h1>
+        <p class="muted">Локальный прототип под Баланс «Точки Склада»</p>
+      </div>
+      <button type="button" class="btn primary" id="btnNew">+ Новая карточка</button>
+      <ul class="list" id="cardList"></ul>
+      <footer class="foot">разработано в Victimok Labs</footer>
+    </aside>
+    <main class="main" id="main">
+      <div class="empty" id="emptyState">
+        <h2>Нет выбранной карточки</h2>
+        <p>Создай новую или выбери слева. Потом это станет карточкой позиции в Балансе склада: фото, название, описание.</p>
+      </div>
+      <section class="editor hidden" id="editor">
+        <div class="card-frame">
+          <div class="photo-wrap">
+            <img id="photoPreview" alt="" class="hidden" />
+            <div class="photo-placeholder" id="photoPlaceholder">Нет фото</div>
+            <label class="photo-btn">
+              Выбрать фото
+              <input type="file" id="photoInput" accept="image/*" hidden />
+            </label>
+          </div>
+          <div class="fields">
+            <label>Название
+              <input type="text" id="fieldName" maxlength="200" placeholder="Например: iPhone 17 Pro Max 256" />
+            </label>
+            <label>Описание
+              <textarea id="fieldDesc" rows="10" placeholder="Кратко: комплектация, состояние, заметки…"></textarea>
+            </label>
+            <div class="actions">
+              <button type="button" class="btn primary" id="btnSave">Сохранить</button>
+              <button type="button" class="btn danger" id="btnDelete">Удалить</button>
+            </div>
+            <p class="status" id="status"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
